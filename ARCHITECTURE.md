@@ -11,11 +11,10 @@ Production-grade reference architecture implementing Collabify's 4 core backend 
 
 ## Directory Boundaries
 ```text
-hn_freelance_436d6780d0ef_collabify/
+collabify-rls-portal/
 ├── ARCHITECTURE.md                  # System map & invariants
 ├── README.md                        # Quickstart, Docker Postgres+PgBouncer, API docs
 ├── ARCHITECTURE_TRADEOFFS.md        # Multi-tenancy, PgBouncer, S3/R2 & Wildcard TLS analysis
-├── APPLY_FORM_ANSWERS.md            # Tailored Collabify form copy + 5-min demo script
 ├── docker-compose.yml               # PostgreSQL 16 + PgBouncer (transaction pool mode)
 ├── db/
 │   ├── migrations/001_multi_tenant_rls.sql  # Roles, composite FKs, ENABLE+FORCE RLS, policies
@@ -52,8 +51,3 @@ HTTP Request
                  -> RBAC / Portal Scope Guard (agency_admin | portal_guest[portalId])
                  -> store.withTenantContext(req.tenant.id, BEGIN -> set_config(..., true) -> SQL -> COMMIT)
 ```
-
-<!-- AUTO-KG-STATS:START -->
-- **Knowledge Graph Live Sync:** `2026-11-25 16:05 UTC` | Nodes: **34** | Edges: **24** | Layers: **5** | Languages: `markdown, sql, typescript`
-- **Top Connected Hubs:** `README.md` (2), `ARCHITECTURE.md` (1), `ARCHITECTURE_TRADEOFFS.md` (1), `db/seed.sql` (1), `db/migrations/001_multi_tenant_rls.sql` (1)
-<!-- AUTO-KG-STATS:END -->
