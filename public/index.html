@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collabify Multi-Tenant Reference Workbench</title>
+  <style>
+    :root {
+      --bg: #0b101b;
+      --surface: #121a2b;
+      --surface-2: #18233a;
+      --border: #253454;
+      --text: #e6edf7;
+      --muted: #8fa3c7;
+      --accent: #38bdf8;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      background: #0e1524;
+      padding: 16px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand h1 { font-size: 18px; margin: 0; letter-spacing: -0.02em; }
+    .badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--accent);
+    }
+    .badge.ok { color: var(--ok); border-color: rgba(34, 197, 94, 0.4); }
+    .badge.danger { color: var(--danger); border-color: rgba(239, 68, 68, 0.4); }
+    .badge.warn { color: var(--warn); border-color: rgba(245, 158, 11, 0.4); }
+    .tenant-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    button {
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    button:hover { border-color: var(--accent); }
+    button.active { background: #13314d; border-color: var(--accent); color: #bae6fd; }
+    button.primary { background: #0284c7; border-color: #38bdf8; color: #fff; }
+    button.primary:hover { background: #0369a1; }
+    button.danger { background: rgba(239, 68, 68, 0.14); border-color: rgba(239, 68, 68, 0.5); color: #fca5a5; }
+    button.danger:hover { background: rgba(239, 68, 68, 0.26); }
+    main {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 20px 24px 40px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .col-6 { grid-column: span 6; }
+    .col-12 { grid-column: span 12; }
+    @media (max-width: 960px) { .col-6 { grid-column: span 12; } }
+    .card h2 {
+      font-size: 14px;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    input, select {
+      background: #0d1423;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: var(--sans);
+    }
+    .mono { font-family: var(--mono); font-size: 12px; }
+    pre {
+      margin: 0;
+      background: #090e18;
+      border: 1px solid #1d2942;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 12px;
+      overflow-x: auto;
+      max-height: 240px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: #090e18;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #0284c7, #22c55e);
+      transition: width 0.2s ease;
+    }
+    .list { display: flex; flex-direction: column; gap: 8px; }
+    .item {
+      background: #0e1627;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .muted { color: var(--muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>Collabify Multi-Tenant Reference</h1>
+      <span class="badge">RLS + Subdomain Portals + Dual Auth + Multipart Video</span>
+    </div>
+    <div class="tenant-bar">
+      <span class="muted">Active Subdomain Host:</span>
+      <button id="btn-acme" class="active" onclick="selectTenantHost('acme.collabify.local')">acme.collabify.local</button>
+      <button id="btn-velvet" onclick="selectTenantHost('velvet.collabify.local')">velvet.collabify.local</button>
+      <button id="btn-custom" onclick="selectTenantHost('portal.acmecreative.io')">portal.acmecreative.io</button>
+      <button id="btn-suspended" onclick="selectTenantHost('suspended-co.collabify.local')">suspended-co (404)</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- 1. Tenant Resolution & Dual Auth -->
+    <section class="card col-6">
+      <h2>
+        <span>1. Subdomain Context &amp; Dual Auth</span>
+        <span id="auth-badge" class="badge warn">Unauthenticated</span>
+      </h2>
+      <div class="item">
+        <div>
+          <div id="tenant-name" style="font-weight: 700;">Resolving...</div>
+          <div id="tenant-meta" class="mono muted"></div>
+        </div>
+        <button onclick="refreshTenantContext()">Re-check Host</button>
+      </div>
+
+      <div class="row">
+        <button class="primary" onclick="loginAgencyAdmin()">Flow A: Sign in Agency Admin</button>
+        <button onclick="mintAndExchangeMagicLink()">Flow B: Mint &amp; Exchange Client Magic Link</button>
+        <button onclick="replayLastMagicLink()">Test Magic-Link Replay (401)</button>
+      </div>
+
+      <div class="muted">Active Principal / JWT Claims (bound to tenantId + optional portalId):</div>
+      <pre id="auth-output">Click "Flow A: Sign in Agency Admin" to obtain a tenant-bound session.</pre>
+    </section>
+
+    <!-- 2. Cross-Tenant Red-Team Simulator -->
+    <section class="card col-6">
+      <h2>
+        <span>2. Cross-Tenant &amp; Fail-Closed Attack Simulator</span>
+        <span class="badge danger">Zero-Trust Verification</span>
+      </h2>
+      <div class="muted">Run live negative security tests against the running API &amp; RLS store:</div>
+      <div class="row">
+        <button class="danger" onclick="attackCrossTenantReplay()">Replay Acme Admin JWT on Velvet (403)</button>
+        <button class="danger" onclick="attackFailClosedRls()">Run Fail-Closed RLS Probe (0 rows / 42501)</button>
+        <button class="danger" onclick="attackSpoofForwardedHost()">Spoof X-Forwarded-Host (400)</button>
+        <button class="danger" onclick="attackGuestPortalEscape()">Guest Portal Escape (403)</button>
+      </div>
+      <pre id="attack-output">Attack simulation logs will appear here with exact HTTP status codes and SQLSTATE errors.</pre>
+    </section>
+
+    <!-- 3. Tenant-Scoped Portals & Videos -->
+    <section class="card col-6">
+      <h2>
+        <span>3. RLS-Scoped Client Portals</span>
+        <button onclick="loadPortals()">Refresh Portals</button>
+      </h2>
+      <div class="row">
+        <select id="portal-select" style="flex: 1;"></select>
+        <button onclick="loadPortalVideos()">Load Videos</button>
+      </div>
+      <div id="portal-videos" class="list">
+        <div class="muted">Sign in to load portals scoped strictly to the active tenant.</div>
+      </div>
+    </section>
+
+    <!-- 4. Multi-Chunk Resumable Video Upload -->
+    <section class="card col-6">
+      <h2>
+        <span>4. Resumable Multipart Video Upload (SHA-256 Verified)</span>
+        <span id="upload-badge" class="badge">Idle</span>
+      </h2>
+      <div class="row">
+        <input type="file" id="video-file" accept="video/*" style="flex: 1;" />
+        <button class="primary" onclick="runMultipartUpload(false, false)">Upload Selected File</button>
+        <button onclick="runMultipartUpload(true, false)">Upload Synthetic 2.5MB (5 Parts)</button>
+        <button onclick="runMultipartUpload(true, true)">Simulate Drop @ Part 3 &amp; Resume</button>
+      </div>
+      <div class="progress-track"><div id="upload-progress" class="progress-fill"></div></div>
+      <pre id="upload-output">Select a video or click "Upload Synthetic 2.5MB Sample" as an Agency Admin to test signed part uploads, per-chunk SHA-256 ETag verification, and tenant-isolated object keys.</pre>
+    </section>
+
+    <!-- 5. Append-Only Audit Events -->
+    <section class="card col-12">
+      <h2>
+        <span>5. Append-Only Tenant Audit Trail (RLS Scoped)</span>
+        <button onclick="loadAuditEvents()">Refresh Audit Log</button>
+      </h2>
+      <pre id="audit-output">Sign in as Agency Admin to inspect tenant-scoped audit events.</pre>
+    </section>
+  </main>
+
+  <script>
+    const SEED = {
+      acmeHost: 'acme.collabify.local',
+      velvetHost: 'velvet.collabify.local',
+      acmePortal1: '10000000-0000-4000-8000-000000000001',
+      acmePortal2: '10000000-0000-4000-8000-000000000002',
+      creds: {
+        'acme.collabify.local': { email: 'alice@acme.studio', password: 'collabify-demo-pass' },
+        'portal.acmecreative.io': { email: 'alice@acme.studio', password: 'collabify-demo-pass' },
+        'velvet.collabify.local': { email: 'bob@velvet.tv', password: 'collabify-demo-pass' },
+      },
+    };
+
+    const state = {
+      activeHost: 'acme.collabify.local',
+      tenant: null,
+      token: null,
+      principal: null,
+      lastMagicToken: null,
+      acmeAdminToken: null,
+      acmeGuestToken: null,
+      portals: [],
+    };
+
+    async function apiFetch(path, options = {}, hostOverride = null) {
+      const headers = new Headers(options.headers || {});
+      headers.set('X-Demo-Tenant-Host', hostOverride || state.activeHost);
+      if (state.token && !headers.has('Authorization') && !options.skipAuth) {
+        headers.set('Authorization', 'Bearer ' + state.token);
+      }
+      const res = await fetch(path, { ...options, headers });
+      const text = await res.text();
+      let json = null;
+      try { json = JSON.parse(text); } catch { json = { raw: text }; }
+      return { status: res.status, body: json };
+    }
+
+    function setActiveHostButtons() {
+      const map = {
+        'acme.collabify.local': 'btn-acme',
+        'velvet.collabify.local': 'btn-velvet',
+        'portal.acmecreative.io': 'btn-custom',
+        'suspended-co.collabify.local': 'btn-suspended',
+      };
+      for (const id of Object.values(map)) {
+        document.getElementById(id).classList.remove('active');
+      }
+      if (map[state.activeHost]) {
+        document.getElementById(map[state.activeHost]).classList.add('active');
+      }
+    }
+
+    async function selectTenantHost(host) {
+      state.activeHost = host;
+      state.token = null;
+      state.principal = null;
+      setActiveHostButtons();
+      updateAuthBadge();
+      await refreshTenantContext();
+      document.getElementById('portal-select').innerHTML = '';
+      document.getElementById('portal-videos').innerHTML = '<div class="muted">Switched tenant subdomain. Sign in again to query this tenant.</div>';
+    }
+
+    async function refreshTenantContext() {
+      const res = await apiFetch('/api/tenant/context', { skipAuth: true });
+      if (res.status === 200) {
+        state.tenant = res.body.tenant;
+        document.getElementById('tenant-name').textContent = `${state.tenant.name} (${state.tenant.slug})`;
+        document.getElementById('tenant-meta').textContent = `tenant_id=${state.tenant.id} | host=${res.body.resolvedHost}`;
+      } else {
+        state.tenant = null;
+        document.getElementById('tenant-name').textContent = `HTTP ${res.status} — ${res.body.error}`;
+        document.getElementById('tenant-meta').textContent = `${res.body.message} (Uniform 404 prevents tenant enumeration)`;
+      }
+    }
+
+    function updateAuthBadge() {
+      const badge = document.getElementById('auth-badge');
+      if (!state.principal) {
+        badge.textContent = 'Unauthenticated';
+        badge.className = 'badge warn';
+      } else if (state.principal.kind === 'agency_admin') {
+        badge.textContent = `Agency Admin (${state.principal.role})`;
+        badge.className = 'badge ok';
+      } else {
+        badge.textContent = `Client Guest (1 Portal Scope)`;
+        badge.className = 'badge';
+      }
+    }
+
+    async function loginAgencyAdmin() {
+      const creds = SEED.creds[state.activeHost];
+      if (!creds) {
+        document.getElementById('auth-output').textContent = 'Select an active tenant (acme or velvet) first.';
+        return;
+      }
+      const res = await apiFetch('/api/auth/agency/login', {
+        method: 'POST',
+        skipAuth: true,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(creds),
+      });
+      document.getElementById('auth-output').textContent = JSON.stringify(res, null, 2);
+      if (res.status === 200) {
+        state.token = res.body.token;
+        state.principal = res.body.principal;
+        if (state.activeHost === SEED.acmeHost || state.activeHost === 'portal.acmecreative.io') {
+          state.acmeAdminToken = res.body.token;
+        }
+        updateAuthBadge();
+        await loadPortals();
+        await loadAuditEvents();
+      }
+    }
+
+    async function mintAndExchangeMagicLink() {
+      if (!state.token || state.principal?.kind !== 'agency_admin') {
+        await loginAgencyAdmin();
+      }
+      const portalId = document.getElementById('portal-select').value || state.portals[0]?.id;
+      if (!portalId) return;
+
+      const mint = await apiFetch(`/api/portals/${portalId}/magic-links`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientEmail: 'client-reviewer@external.org' }),
+      });
+      if (mint.status !== 201) {
+        document.getElementById('auth-output').textContent = JSON.stringify(mint, null, 2);
+        return;
+      }
+      state.lastMagicToken = mint.body.rawToken;
+
+      const exchange = await apiFetch('/api/auth/portal/exchange', {
+        method: 'POST',
+        skipAuth: true,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: state.lastMagicToken }),
+      });
+
+      document.getElementById('auth-output').textContent = JSON.stringify(
+        { step1_mintedHashStoredInDb: { magicLinkId: mint.body.magicLinkId, portalId, expiresAt: mint.body.expiresAt }, step2_exchangedForScopedGuest: exchange },
+        null,
+        2,
+      );
+
+      if (exchange.status === 200) {
+        state.token = exchange.body.token;
+        state.principal = exchange.body.principal;
+        if (state.activeHost === SEED.acmeHost) {
+          state.acmeGuestToken = exchange.body.token;
+        }
+        updateAuthBadge();
+        await loadPortals();
+      }
+    }
+
+    async function replayLastMagicLink() {
+      if (!state.lastMagicToken) {
+        document.getElementById('auth-output').textContent = 'Run "Flow B: Mint & Exchange Client Magic Link" first.';
+        return;
+      }
+      const res = await apiFetch('/api/auth/portal/exchange', {
+        method: 'POST',
+        skipAuth: true,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: state.lastMagicToken }),
+      });
+      document.getElementById('auth-output').textContent = JSON.stringify(
+        { test: 'Single-use magic link replay', result: res },
+        null,
+        2,
+      );
+    }
+
+    async function loadPortals() {
+      const res = await apiFetch('/api/portals');
+      if (res.status !== 200) return;
+      state.portals = res.body.portals || [];
+      const select = document.getElementById('portal-select');
+      select.innerHTML = '';
+      for (const p of state.portals) {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.name} — ${p.clientName} (${p.id.slice(0, 8)}...)`;
+        select.appendChild(opt);
+      }
+      if (state.portals.length > 0) {
+        await loadPortalVideos();
+      }
+    }
+
+    async function loadPortalVideos() {
+      const portalId = document.getElementById('portal-select').value;
+      if (!portalId) return;
+      const res = await apiFetch(`/api/portals/${portalId}/videos`);
+      const container = document.getElementById('portal-videos');
+      if (res.status !== 200) {
+        container.innerHTML = `<pre>${JSON.stringify(res, null, 2)}</pre>`;
+        return;
+      }
+      const videos = res.body.videos || [];
+      if (videos.length === 0) {
+        container.innerHTML = '<div class="muted">No videos in this portal yet.</div>';
+        return;
+      }
+      container.innerHTML = '';
+      for (const v of videos) {
+        const el = document.createElement('div');
+        el.className = 'item';
+        const mb = (v.sizeBytes / (1024 * 1024)).toFixed(2);
+
+        const info = document.createElement('div');
+        const titleLine = document.createElement('div');
+        const strong = document.createElement('strong');
+        strong.textContent = v.filename;
+        const statusBadge = document.createElement('span');
+        statusBadge.className = `badge ${v.status === 'READY' ? 'ok' : 'warn'}`;
+        statusBadge.style.marginLeft = '6px';
+        statusBadge.textContent = v.status;
+        titleLine.appendChild(strong);
+        titleLine.appendChild(statusBadge);
+
+        const keyLine = document.createElement('div');
+        keyLine.className = 'mono muted';
+        keyLine.textContent = v.objectKey;
+
+        const metaLine = document.createElement('div');
+        metaLine.className = 'muted';
+        metaLine.textContent = `${mb} MB | ${v.expectedPartCount} parts${v.approvedByEmail ? ' | Approved by ' + v.approvedByEmail : ''}`;
+
+        info.appendChild(titleLine);
+        info.appendChild(keyLine);
+        info.appendChild(metaLine);
+
+        const actions = document.createElement('div');
+        actions.className = 'row';
+
+        const playBtn = document.createElement('button');
+        playBtn.textContent = 'Signed Playback (206)';
+        playBtn.addEventListener('click', () => requestPlayback(portalId, v.id));
+
+        const approveBtn = document.createElement('button');
+        approveBtn.textContent = 'Approve';
+        approveBtn.addEventListener('click', () => approveVideo(portalId, v.id));
+
+        actions.appendChild(playBtn);
+        actions.appendChild(approveBtn);
+
+        el.appendChild(info);
+        el.appendChild(actions);
+        container.appendChild(el);
+      }
+    }
+
+    async function requestPlayback(portalId, videoId) {
+      const res = await apiFetch(`/api/portals/${portalId}/videos/${videoId}/playback`);
+      let rangeCheck = null;
+      if (res.status === 200 && res.body?.playbackUrl) {
+        const streamRes = await fetch(res.body.playbackUrl, {
+          headers: {
+            'X-Demo-Tenant-Host': state.activeHost,
+            Range: 'bytes=0-63',
+          },
+        });
+        const buf = await streamRes.arrayBuffer();
+        rangeCheck = {
+          httpStatus: streamRes.status,
+          contentRange: streamRes.headers.get('content-range'),
+          contentType: streamRes.headers.get('content-type'),
+          bytesReceived: buf.byteLength,
+          manifestSha256: streamRes.headers.get('x-collabify-manifest-sha256'),
+        };
+      }
+      document.getElementById('upload-output').textContent = JSON.stringify(
+        { playbackAuth: res, signedRangeStreamCheck: rangeCheck },
+        null,
+        2,
+      );
+    }
+
+    async function approveVideo(portalId, videoId) {
+      const res = await apiFetch(`/api/portals/${portalId}/videos/${videoId}/approve`, { method: 'POST' });
+      document.getElementById('upload-output').textContent = JSON.stringify({ approval: res }, null, 2);
+      await loadPortalVideos();
+    }
+
+    async function loadAuditEvents() {
+      const res = await apiFetch('/api/audit-events');
+      document.getElementById('audit-output').textContent = JSON.stringify(res, null, 2);
+    }
+
+    async function sha256HexBrowser(arrayBuffer) {
+      const hash = await crypto.subtle.digest('SHA-256', arrayBuffer);
+      return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function runMultipartUpload(useSynthetic, simulateDrop = false) {
+      const out = document.getElementById('upload-output');
+      const badge = document.getElementById('upload-badge');
+      const bar = document.getElementById('upload-progress');
+
+      if (!state.token || state.principal?.kind !== 'agency_admin') {
+        out.textContent = 'Multipart video upload initiation requires Agency Admin credentials (click Flow A first).';
+        return;
+      }
+      const portalId = document.getElementById('portal-select').value;
+      if (!portalId) {
+        out.textContent = 'Select a target portal first.';
+        return;
+      }
+
+      let fileName = simulateDrop ? 'resumable_4k_cut_drop_test.mp4' : 'synthetic_4k_master_sample.mp4';
+      let contentType = 'video/mp4';
+      let blob = null;
+      const chunkSize = 512 * 1024; // 512KB demo chunks
+
+      if (useSynthetic) {
+        const bytes = new Uint8Array(2.5 * 1024 * 1024);
+        for (let i = 0; i < bytes.length; i += 4096) bytes[i] = (i / 4096) & 255;
+        blob = new Blob([bytes], { type: 'video/mp4' });
+      } else {
+        const input = document.getElementById('video-file');
+        if (!input.files || !input.files[0]) {
+          out.textContent = 'Choose a video file or click "Upload Synthetic 2.5MB (5 Parts)".';
+          return;
+        }
+        blob = input.files[0];
+        fileName = blob.name;
+        contentType = blob.type || 'video/mp4';
+      }
+
+      const partCount = Math.max(1, Math.ceil(blob.size / chunkSize));
+      badge.textContent = 'Initiating...';
+      badge.className = 'badge';
+      bar.style.width = '5%';
+
+      const initRes = await apiFetch(`/api/portals/${portalId}/videos/init`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: fileName, contentType, sizeBytes: blob.size, partCount }),
+      });
+
+      if (initRes.status !== 201) {
+        badge.textContent = 'Rejected';
+        badge.className = 'badge danger';
+        out.textContent = JSON.stringify(initRes, null, 2);
+        return;
+      }
+
+      const { videoId, objectKey, partUrls } = initRes.body;
+      const completedByPart = new Map();
+      const logs = [`INIT OK: videoId=${videoId}`, `OBJECT KEY: ${objectKey}`, `PARTS: ${partCount}`];
+
+      async function uploadSinglePart(partNumber, signedUrl, labelPrefix = '') {
+        const start = (partNumber - 1) * chunkSize;
+        const end = Math.min(blob.size, start + chunkSize);
+        const sliceBuf = await blob.slice(start, end).arrayBuffer();
+        const sha256 = await sha256HexBrowser(sliceBuf);
+
+        badge.textContent = `${labelPrefix}Uploading part ${partNumber}/${partCount}`;
+        const putRes = await apiFetch(signedUrl, {
+          method: 'PUT',
+          skipAuth: true,
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            'X-Content-Sha256': sha256,
+          },
+          body: sliceBuf,
+        });
+        if (putRes.status !== 200) {
+          badge.textContent = 'Part Failed';
+          badge.className = 'badge danger';
+          out.textContent = JSON.stringify(putRes, null, 2);
+          return false;
+        }
+        completedByPart.set(partNumber, { partNumber, etag: putRes.body.etag });
+        logs.push(
+          `  ${labelPrefix}PART ${partNumber}/${partCount} OK (${putRes.body.sizeBytes} B) SHA-256=${putRes.body.etag.slice(0, 16)}...`,
+        );
+        bar.style.width = `${Math.round((completedByPart.size / partCount) * 88) + 5}%`;
+        out.textContent = logs.join('\n');
+        return true;
+      }
+
+      const dropAfter = simulateDrop && partCount >= 4 ? 3 : partCount;
+      for (let partNum = 1; partNum <= dropAfter; partNum++) {
+        const ok = await uploadSinglePart(partNum, partUrls[partNum - 1].url);
+        if (!ok) return;
+      }
+
+      if (dropAfter < partCount) {
+        badge.textContent = 'Network Dropped! Querying /upload-status...';
+        badge.className = 'badge warn';
+        logs.push(`\n--- SIMULATED NETWORK DROP after part ${dropAfter}/${partCount} ---`);
+        const statusRes = await apiFetch(`/api/portals/${portalId}/videos/${videoId}/upload-status`);
+        if (statusRes.status !== 200) {
+          badge.textContent = 'Resume Status Failed';
+          badge.className = 'badge danger';
+          out.textContent = JSON.stringify(statusRes, null, 2);
+          return;
+        }
+        logs.push(
+          `RESUME STATUS OK: landed=[${statusRes.body.uploadedParts.map((p) => p.partNumber).join(',')}] missing=[${statusRes.body.missingPartNumbers.join(',')}] (re-signed ${statusRes.body.resumePartUrls.length} URLs only)`,
+        );
+        out.textContent = logs.join('\n');
+        for (const p of statusRes.body.uploadedParts) {
+          completedByPart.set(p.partNumber, { partNumber: p.partNumber, etag: p.etag });
+        }
+        badge.className = 'badge';
+        for (const missing of statusRes.body.resumePartUrls) {
+          const ok = await uploadSinglePart(missing.partNumber, missing.url, '[RESUMED] ');
+          if (!ok) return;
+        }
+      }
+
+      const completedParts = Array.from(completedByPart.values()).sort(
+        (a, b) => a.partNumber - b.partNumber,
+      );
+
+      badge.textContent = 'Verifying Manifest...';
+      const completeRes = await apiFetch(`/api/portals/${portalId}/videos/${videoId}/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ parts: completedParts }),
+      });
+
+      bar.style.width = '100%';
+      badge.textContent = completeRes.status === 200 ? 'READY (Verified)' : 'Failed';
+      badge.className = completeRes.status === 200 ? 'badge ok' : 'badge danger';
+      logs.push(`\nCOMPLETE HTTP ${completeRes.status}: manifestSha256=${completeRes.body.manifestSha256}`);
+      out.textContent = logs.join('\n');
+
+      await loadPortalVideos();
+      await loadAuditEvents();
+    }
+
+    // --- Red-Team Attack Simulations ---
+    async function attackCrossTenantReplay() {
+      let acmeToken = state.acmeAdminToken;
+      if (!acmeToken) {
+        const login = await apiFetch(
+          '/api/auth/agency/login',
+          {
+            method: 'POST',
+            skipAuth: true,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(SEED.creds[SEED.acmeHost]),
+          },
+          SEED.acmeHost,
+        );
+        acmeToken = login.body.token;
+        state.acmeAdminToken = acmeToken;
+      }
+
+      const res = await apiFetch(
+        '/api/portals',
+        { headers: { Authorization: 'Bearer ' + acmeToken } },
+        SEED.velvetHost,
+      );
+      document.getElementById('attack-output').textContent = JSON.stringify(
+        {
+          attack: 'Replay Tenant A (Acme) Agency Admin JWT against Tenant B (velvet.collabify.local)',
+          expected: 'HTTP 403 TENANT_MISMATCH',
+          actual: res,
+        },
+        null,
+        2,
+      );
+    }
+
+    async function attackFailClosedRls() {
+      if (!state.token) await loginAgencyAdmin();
+      const res = await apiFetch('/api/demo/rls-probe', { method: 'POST' });
+      document.getElementById('attack-output').textContent = JSON.stringify(
+        {
+          attack: 'Fail-Closed PostgreSQL RLS Probe (missing context + cross-tenant read + cross-tenant write)',
+          actual: res,
+        },
+        null,
+        2,
+      );
+    }
+
+    async function attackSpoofForwardedHost() {
+      const res = await fetch('/api/tenant/context', {
+        headers: {
+          'X-Forwarded-Host': 'velvet.collabify.local',
+        },
+      });
+      const body = await res.json();
+      document.getElementById('attack-output').textContent = JSON.stringify(
+        {
+          attack: 'Send spoofed X-Forwarded-Host: velvet.collabify.local from untrusted client IP',
+          expected: 'HTTP 400 UNTRUSTED_FORWARDED_HOST',
+          actual: { status: res.status, body },
+        },
+        null,
+        2,
+      );
+    }
+
+    async function attackGuestPortalEscape() {
+      // Ensure we have an Acme Portal 1 guest token, then try reading Acme Portal 2
+      const login = await apiFetch(
+        '/api/auth/agency/login',
+        {
+          method: 'POST',
+          skipAuth: true,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(SEED.creds[SEED.acmeHost]),
+        },
+        SEED.acmeHost,
+      );
+      const mint = await apiFetch(
+        `/api/portals/${SEED.acmePortal1}/magic-links`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + login.body.token,
+          },
+          body: JSON.stringify({ clientEmail: 'portal1-guest@client.io' }),
+        },
+        SEED.acmeHost,
+      );
+      const exchange = await apiFetch(
+        '/api/auth/portal/exchange',
+        {
+          method: 'POST',
+          skipAuth: true,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: mint.body.rawToken }),
+        },
+        SEED.acmeHost,
+      );
+      const escapeAttempt = await apiFetch(
+        `/api/portals/${SEED.acmePortal2}/videos`,
+        { headers: { Authorization: 'Bearer ' + exchange.body.token } },
+        SEED.acmeHost,
+      );
+      document.getElementById('attack-output').textContent = JSON.stringify(
+        {
+          attack: 'Portal 1 Guest attempts to read Portal 2 videos within the SAME tenant (Acme)',
+          expected: 'HTTP 403 PORTAL_SCOPE_MISMATCH',
+          actual: escapeAttempt,
+        },
+        null,
+        2,
+      );
+    }
+
+    // Boot
+    refreshTenantContext();
+  </script>
+</body>
+</html>

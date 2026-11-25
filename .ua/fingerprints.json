@@ -1,0 +1,157 @@
+{
+  "APPLY_FORM_ANSWERS.md": {
+    "size": 9809,
+    "mtime_ns": 1795602128648448700,
+    "hash": "478e8845b7b38de5"
+  },
+  "ARCHITECTURE.md": {
+    "size": 5318,
+    "mtime_ns": 1795622679759505100,
+    "hash": "1cd3f971a74246eb"
+  },
+  "ARCHITECTURE_TRADEOFFS.md": {
+    "size": 9427,
+    "mtime_ns": 1795602099701462200,
+    "hash": "c7193bdb28f3c844"
+  },
+  "README.md": {
+    "size": 5920,
+    "mtime_ns": 1795622541627862200,
+    "hash": "ff46f62ce04688c1"
+  },
+  "docker-compose.yml": {
+    "size": 1076,
+    "mtime_ns": 1795596028053118400,
+    "hash": "5a4805cd8919658e"
+  },
+  "package-lock.json": {
+    "size": 102945,
+    "mtime_ns": 1795596372528974300,
+    "hash": "709579c6f6b362d8"
+  },
+  "package.json": {
+    "size": 801,
+    "mtime_ns": 1795596008888689900,
+    "hash": "c31973d7453379e2"
+  },
+  "tsconfig.json": {
+    "size": 540,
+    "mtime_ns": 1795596013969173800,
+    "hash": "7d05ec622e59dd4e"
+  },
+  "vitest.config.ts": {
+    "size": 200,
+    "mtime_ns": 1795596016625489200,
+    "hash": "13a8c6ecaebc0328"
+  },
+  "db/seed.sql": {
+    "size": 3302,
+    "mtime_ns": 1795596042668996200,
+    "hash": "c45ee92561cba82f"
+  },
+  "db/migrations/001_multi_tenant_rls.sql": {
+    "size": 15543,
+    "mtime_ns": 1795600811586744300,
+    "hash": "080f021e5ba0e0ba"
+  },
+  "src/server/app.ts": {
+    "size": 3632,
+    "mtime_ns": 1795599781121861400,
+    "hash": "09bdb4f960a61be8"
+  },
+  "src/server/config.ts": {
+    "size": 2256,
+    "mtime_ns": 1795596174638664600,
+    "hash": "c68d831e1fa910fb"
+  },
+  "src/server/index.ts": {
+    "size": 999,
+    "mtime_ns": 1795596508261697900,
+    "hash": "78cf19510f0ded18"
+  },
+  "src/server/types.ts": {
+    "size": 2608,
+    "mtime_ns": 1795596192647557500,
+    "hash": "039483e8f860bae4"
+  },
+  "src/server/auth/middleware.ts": {
+    "size": 4302,
+    "mtime_ns": 1795596459614691400,
+    "hash": "10847136b0484bae"
+  },
+  "src/server/auth/routes.ts": {
+    "size": 8497,
+    "mtime_ns": 1795601024059881200,
+    "hash": "f9048b678486ef3c"
+  },
+  "src/server/auth/tokens.ts": {
+    "size": 5793,
+    "mtime_ns": 1795596452970595300,
+    "hash": "6d09af13a55ac9ef"
+  },
+  "src/server/db/memoryStore.ts": {
+    "size": 17748,
+    "mtime_ns": 1795600937212261200,
+    "hash": "c6661ee2e315328e"
+  },
+  "src/server/db/pgAdapter.ts": {
+    "size": 14234,
+    "mtime_ns": 1795596267871236200,
+    "hash": "7f3f20b52e81e3b1"
+  },
+  "src/server/db/store.ts": {
+    "size": 3354,
+    "mtime_ns": 1795600923450464000,
+    "hash": "f749abf83eb96269"
+  },
+  "src/server/db/tenantContext.ts": {
+    "size": 3011,
+    "mtime_ns": 1795596214995032100,
+    "hash": "bda55506ecd2b4ab"
+  },
+  "src/server/middleware/subdomain.ts": {
+    "size": 5538,
+    "mtime_ns": 1795596441011004200,
+    "hash": "84b10f1659bdc93c"
+  },
+  "src/server/routes/portals.ts": {
+    "size": 6569,
+    "mtime_ns": 1795601040093001200,
+    "hash": "f8091b4ff87b6948"
+  },
+  "src/server/uploads/multipart.ts": {
+    "size": 23295,
+    "mtime_ns": 1795601001866606900,
+    "hash": "46240cce236bbee4"
+  },
+  "src/server/uploads/presigner.ts": {
+    "size": 6671,
+    "mtime_ns": 1795600969820299100,
+    "hash": "7f80786087573110"
+  },
+  "tests/auth-flows.test.ts": {
+    "size": 7875,
+    "mtime_ns": 1795601224667031800,
+    "hash": "23542a368e195c05"
+  },
+  "tests/multipart-upload.test.ts": {
+    "size": 15414,
+    "mtime_ns": 1795601248627922800,
+    "hash": "b5530b81ff32fe79"
+  },
+  "tests/rls-isolation.test.ts": {
+    "size": 7062,
+    "mtime_ns": 1795601237717808300,
+    "hash": "df9504da912dce4a"
+  },
+  "tests/sql-rls-static.test.ts": {
+    "size": 4569,
+    "mtime_ns": 1795601213052476700,
+    "hash": "15671606ba095478"
+  },
+  "tests/subdomain.test.ts": {
+    "size": 5477,
+    "mtime_ns": 1795600341337405500,
+    "hash": "87ad3c03c0d57f9a"
+  }
+}
