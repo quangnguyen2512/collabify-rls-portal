@@ -51,3 +51,8 @@ HTTP Request
                  -> RBAC / Portal Scope Guard (agency_admin | portal_guest[portalId])
                  -> store.withTenantContext(req.tenant.id, BEGIN -> set_config(..., true) -> SQL -> COMMIT)
 ```
+
+<!-- AUTO-KG-STATS:START -->
+- **Knowledge Graph Live Sync:** `2026-11-25 16:21 UTC` | Nodes: **34** | Edges: **24** | Layers: **5** | Languages: `markdown, sql, typescript`
+- **Top Connected Hubs:** `README.md` (2), `ARCHITECTURE.md` (1), `ARCHITECTURE_TRADEOFFS.md` (1), `db/seed.sql` (1), `db/migrations/001_multi_tenant_rls.sql` (1)
+<!-- AUTO-KG-STATS:END -->
